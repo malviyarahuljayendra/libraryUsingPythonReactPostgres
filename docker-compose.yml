@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: library_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT_EXTERNAL}:${DB_PORT}"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: library_backend
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      GRPC_PORT: ${GRPC_PORT}
+      MAX_WORKERS: ${MAX_WORKERS}
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: python backend/main.py
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: library_gateway
+    environment:
+      PORT: ${GATEWAY_PORT}
+      BACKEND_HOST: ${BACKEND_HOST}
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    depends_on:
+      - backend
+    volumes:
+      - ./gateway:/app
+      - /app/node_modules
+      - ./proto:/app/proto
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library_frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+    ports:
+      - "${VITE_PORT}:${VITE_PORT}"
+    depends_on:
+      - gateway
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  seed:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: library_seed
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      GRPC_HOST: backend
+      GRPC_PORT: ${GRPC_PORT}
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - .:/app
+    command: >
+      sh -c "sleep 15 && python backend/seed_data.py"
+
+volumes:
+  db_data:
