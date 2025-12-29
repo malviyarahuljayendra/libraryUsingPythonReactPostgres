@@ -1,0 +1,38 @@
+[
+    {
+        "title": "The Fellowship of the Ring",
+        "author_name": "J.R.R. Tolkien",
+        "genres": [
+            "Fantasy"
+        ],
+        "isbn": "ISBN-TOLK-001",
+        "copies": 3
+    },
+    {
+        "title": "I, Robot",
+        "author_name": "Isaac Asimov",
+        "genres": [
+            "Science Fiction"
+        ],
+        "isbn": "ISBN-ASIM-001",
+        "copies": 2
+    },
+    {
+        "title": "The Murder of Roger Ackroyd",
+        "author_name": "Agatha Christie",
+        "genres": [
+            "Mystery"
+        ],
+        "isbn": "ISBN-CHRI-001",
+        "copies": 1
+    },
+    {
+        "title": "Steve Jobs",
+        "author_name": "Walter Isaacson",
+        "genres": [
+            "Biography"
+        ],
+        "isbn": "ISBN-ISAAC-001",
+        "copies": 2
+    }
+]

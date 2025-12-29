@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package library;
+
+service LibraryService {
+    // Authors
+    rpc CreateAuthor (CreateAuthorRequest) returns (Author) {}
+    rpc ListAuthors (ListAuthorsRequest) returns (ListAuthorsResponse) {}
+    
+    // Genres
+    rpc CreateGenre (CreateGenreRequest) returns (Genre) {}
+    rpc ListGenres (ListGenresRequest) returns (ListGenresResponse) {}
+
+    // Books (Metadata)
+    rpc CreateBook (CreateBookRequest) returns (Book) {}
+    rpc ListBooks (ListBooksRequest) returns (ListBooksResponse) {}
+    rpc UpdateBook (UpdateBookRequest) returns (Book) {}
+    
+    // Copies
+    rpc AddBookCopy (AddBookCopyRequest) returns (BookCopy) {}
+    rpc ListBookCopies (ListBookCopiesRequest) returns (ListBookCopiesResponse) {}
+
+    // Members
+    rpc CreateMember (CreateMemberRequest) returns (Member) {}
+    rpc ListMembers (ListMembersRequest) returns (ListMembersResponse) {}
+    rpc UpdateMember (UpdateMemberRequest) returns (Member) {}
+    
+    // Loans
+    rpc BorrowBook (BorrowBookRequest) returns (Loan) {}
+    rpc ReturnBook (ReturnBookRequest) returns (Loan) {}
+    rpc ListMemberLoans (ListMemberLoansRequest) returns (ListLoansResponse) {}
+}
+
+message Author {
+    string id = 1;
+    string name = 2;
+    string bio = 3;
+}
+
+message Genre {
+    string id = 1;
+    string name = 2;
+}
+
+message Book {
+    string id = 1;
+    string title = 2;
+    Author author = 3;
+    string isbn = 4;
+    repeated Genre genres = 5;
+    int32 total_copies = 6;
+    int32 available_copies = 7;
+}
+
+message BookCopy {
+    string id = 1;
+    string book_id = 2;
+    bool is_available = 3;
+    string status = 4; // e.g., "Available", "Borrowed", "Maintenance"
+}
+
+message Member {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message Loan {
+    string id = 1;
+    string copy_id = 2;
+    string book_title = 3;
+    string member_id = 4;
+    string borrowed_at = 5;
+    string returned_at = 6;
+}
+
+// Request/Response Messages
+
+message CreateAuthorRequest {
+    string name = 1;
+    string bio = 2;
+}
+
+message ListAuthorsRequest {}
+
+message ListAuthorsResponse {
+    repeated Author authors = 1;
+}
+
+message CreateGenreRequest {
+    string name = 1;
+}
+
+message ListGenresRequest {}
+
+message ListGenresResponse {
+    repeated Genre genres = 1;
+}
+
+message CreateBookRequest {
+    string title = 1;
+    string author_id = 2;
+    string isbn = 3;
+    repeated string genre_ids = 4;
+    int32 initial_copies = 5;
+}
+
+message ListBooksRequest {}
+
+message UpdateBookRequest {
+    string id = 1;
+    optional string title = 2;
+    optional string author_id = 3;
+    optional string isbn = 4;
+    repeated string genre_ids = 5;
+}
+
+message ListBooksResponse {
+    repeated Book books = 1;
+}
+
+message AddBookCopyRequest {
+    string book_id = 1;
+}
+
+message ListBookCopiesRequest {
+    string book_id = 1;
+}
+
+message ListBookCopiesResponse {
+    repeated BookCopy copies = 1;
+}
+
+message CreateMemberRequest {
+    string name = 1;
+    string email = 2;
+}
+
+message ListMembersRequest {}
+
+message UpdateMemberRequest {
+    string id = 1;
+    optional string name = 2;
+    optional string email = 3;
+}
+
+message ListMembersResponse {
+    repeated Member members = 1;
+}
+
+message BorrowBookRequest {
+    string member_id = 1;
+    string book_id = 2; // Can borrow by book_id (finds any available copy) or specific copy_id
+    optional string copy_id = 3; 
+}
+
+message ReturnBookRequest {
+    string loan_id = 1;
+}
+
+message ListMemberLoansRequest {
+    string member_id = 1;
+}
+
+message ListLoansResponse {
+    repeated Loan loans = 1;
+}
