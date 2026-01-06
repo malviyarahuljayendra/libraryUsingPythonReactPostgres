@@ -1,52 +1,54 @@
 const express = require('express');
 const router = express.Router();
 const client = require('./client');
+const { grpcAsync } = require('./utils/grpcHelper');
+
+// Helper to wrap async routes
+const asyncHandler = fn => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
 
 // --- Authors ---
-router.get('/authors', (req, res) => {
-    client.ListAuthors({}, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.authors);
-    });
-});
+router.get('/authors', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListAuthors', { page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
-router.post('/authors', (req, res) => {
+router.post('/authors', asyncHandler(async (req, res) => {
     const { name, bio } = req.body;
-    client.CreateAuthor({ name, bio }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.status(201).json(response);
-    });
-});
+    const response = await grpcAsync(client, 'CreateAuthor', { name, bio }, req);
+    res.status(201).json(response);
+}));
 
 // --- Genres ---
-router.get('/genres', (req, res) => {
-    client.ListGenres({}, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.genres);
-    });
-});
+router.get('/genres', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListGenres', { page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
-router.post('/genres', (req, res) => {
+router.post('/genres', asyncHandler(async (req, res) => {
     const { name } = req.body;
-    client.CreateGenre({ name }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.status(201).json(response);
-    });
-});
+    const response = await grpcAsync(client, 'CreateGenre', { name }, req);
+    res.status(201).json(response);
+}));
 
 // --- Books ---
-router.get('/books', (req, res) => {
-    client.ListBooks({}, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.books);
-    });
-});
+router.get('/books', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListBooks', { page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
-router.post('/books', (req, res) => {
-    console.log("Gateway POST /books Body:", req.body);
+router.post('/books', asyncHandler(async (req, res) => {
     const { title, author_id, isbn, genre_ids, initial_copies } = req.body;
+    // Basic validation still useful here but could rely on backend
     if (!title || !isbn) {
-        return res.status(400).json({ error: "Missing required fields (title, isbn)" });
+        // Manually throw object to be caught by handler if desired, 
+        // OR just return custom error.
+        // For consistency, let's keep basic HTTP valid here:
+        return res.status(400).json({ error: { code: "INVALID_ARGUMENT", message: "Missing title or isbn" } });
     }
 
     const grpcRequest = {
@@ -56,102 +58,73 @@ router.post('/books', (req, res) => {
         genre_ids: genre_ids || [],
         initial_copies: parseInt(initial_copies) || 0
     };
-    console.log("Sending CreateBook to gRPC:", grpcRequest);
 
-    client.CreateBook(grpcRequest, (err, response) => {
-        if (err) {
-            console.error("gRPC CreateBook Error:", err);
-            if (err.code === 6) return res.status(409).json({ error: err.details });
-            return res.status(500).json({ error: err.details });
-        }
-        res.status(201).json(response);
-    });
-});
+    const response = await grpcAsync(client, 'CreateBook', grpcRequest, req);
+    res.status(201).json(response);
+}));
 
-router.put('/books/:id', (req, res) => {
+router.put('/books/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { title, author_id, isbn, genre_ids } = req.body;
-
-    client.UpdateBook({ id, title, author_id, isbn, genre_ids: genre_ids || [] }, (err, response) => {
-        if (err) {
-            if (err.code === 5) return res.status(404).json({ error: err.details });
-            if (err.code === 6) return res.status(409).json({ error: err.details });
-            return res.status(500).json({ error: err.details });
-        }
-        res.json(response);
-    });
-});
+    const response = await grpcAsync(client, 'UpdateBook', { id, title, author_id, isbn, genre_ids: genre_ids || [] }, req);
+    res.json(response);
+}));
 
 // --- Copies ---
-router.post('/books/:id/copies', (req, res) => {
-    client.AddBookCopy({ book_id: req.params.id }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.status(201).json(response);
-    });
-});
+router.post('/books/:id/copies', asyncHandler(async (req, res) => {
+    const response = await grpcAsync(client, 'AddBookCopy', { book_id: req.params.id }, req);
+    res.status(201).json(response);
+}));
 
-router.get('/books/:id/copies', (req, res) => {
-    client.ListBookCopies({ book_id: req.params.id }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.copies);
-    });
-});
+router.get('/books/:id/copies', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListBookCopies', { book_id: req.params.id, page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
 // --- Members ---
-router.post('/members', (req, res) => {
+router.post('/members', asyncHandler(async (req, res) => {
     const { name, email } = req.body;
-    client.CreateMember({ name, email }, (err, response) => {
-        if (err) {
-            if (err.code === 6) return res.status(409).json({ error: err.details });
-            return res.status(500).json({ error: err.details });
-        }
-        res.status(201).json(response);
-    });
-});
+    const response = await grpcAsync(client, 'CreateMember', { name, email }, req);
+    res.status(201).json(response);
+}));
 
-router.put('/members/:id', (req, res) => {
+router.put('/members/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { name, email } = req.body;
+    const response = await grpcAsync(client, 'UpdateMember', { id, name, email }, req);
+    res.json(response);
+}));
 
-    client.UpdateMember({ id, name, email }, (err, response) => {
-        if (err) {
-            if (err.code === 5) return res.status(404).json({ error: err.details });
-            if (err.code === 6) return res.status(409).json({ error: err.details });
-            return res.status(500).json({ error: err.details });
-        }
-        res.json(response);
-    });
-});
-
-router.get('/members', (req, res) => {
-    client.ListMembers({}, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.members);
-    });
-});
+router.get('/members', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListMembers', { page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
 // --- Loans ---
-router.post('/borrow', (req, res) => {
+router.post('/borrow', asyncHandler(async (req, res) => {
     const { member_id, book_id, copy_id } = req.body;
-    client.BorrowBook({ member_id, book_id, copy_id }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response);
-    });
-});
+    const response = await grpcAsync(client, 'BorrowBook', { member_id, book_id, copy_id }, req);
+    res.json(response);
+}));
 
-router.post('/return', (req, res) => {
+router.post('/return', asyncHandler(async (req, res) => {
     const { loan_id } = req.body;
-    client.ReturnBook({ loan_id }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response);
-    });
-});
+    const response = await grpcAsync(client, 'ReturnBook', { loan_id }, req);
+    res.json(response);
+}));
 
-router.get('/loans/:member_id', (req, res) => {
-    client.ListMemberLoans({ member_id: req.params.member_id }, (err, response) => {
-        if (err) return res.status(500).json({ error: err.details });
-        res.json(response.loans);
-    });
-});
+router.get('/loans', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListAllLoans', { page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
+
+router.get('/loans/:member_id', asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const response = await grpcAsync(client, 'ListMemberLoans', { member_id: req.params.member_id, page: parseInt(page), limit: parseInt(limit) }, req);
+    res.json(response);
+}));
 
 module.exports = router;

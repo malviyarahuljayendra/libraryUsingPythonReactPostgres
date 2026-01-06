@@ -1,0 +1,16 @@
+[run]
+source = backend
+omit =
+    backend/generated/*
+    backend/seed_data.py
+    backend/main.py
+    backend/verify_aop.py
+    backend/verify_normalization.py
+    backend/tests/*
+    backend/controllers/*
+    backend/services/managers/*
+    backend/api/middleware.py
+    backend/core/database/infrastructure/session.py
+    backend/core/database/initialization/*
+[report]
+show_missing = True

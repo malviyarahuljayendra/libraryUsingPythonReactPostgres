@@ -11,6 +11,14 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 
+// Request ID Middleware
+app.use((req, res, next) => {
+    if (!req.headers['x-request-id']) {
+        req.headers['x-request-id'] = require('crypto').randomUUID();
+    }
+    next();
+});
+
 // Routes
 app.use('/api', routes);
 
@@ -31,6 +39,16 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', service: 'library-gateway' });
 });
+
+const errorHandler = require('./middleware/errorHandler');
+
+// ... (routes) ...
+app.use('/api', routes);
+
+// ... (other routes) ...
+
+// Global Error Handler (MUST be last)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Gateway running on http://localhost:${PORT}`);

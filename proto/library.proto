@@ -29,6 +29,7 @@ service LibraryService {
     rpc BorrowBook (BorrowBookRequest) returns (Loan) {}
     rpc ReturnBook (ReturnBookRequest) returns (Loan) {}
     rpc ListMemberLoans (ListMemberLoansRequest) returns (ListLoansResponse) {}
+    rpc ListAllLoans (ListAllLoansRequest) returns (ListLoansResponse) {}
 }
 
 message Author {
@@ -72,6 +73,8 @@ message Loan {
     string member_id = 4;
     string borrowed_at = 5;
     string returned_at = 6;
+    string member_name = 7;
+    string member_email = 8;
 }
 
 // Request/Response Messages
@@ -81,20 +84,30 @@ message CreateAuthorRequest {
     string bio = 2;
 }
 
-message ListAuthorsRequest {}
+message ListAuthorsRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
 
 message ListAuthorsResponse {
     repeated Author authors = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }
 
 message CreateGenreRequest {
     string name = 1;
 }
 
-message ListGenresRequest {}
+message ListGenresRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
 
 message ListGenresResponse {
     repeated Genre genres = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }
 
 message CreateBookRequest {
@@ -105,7 +118,10 @@ message CreateBookRequest {
     int32 initial_copies = 5;
 }
 
-message ListBooksRequest {}
+message ListBooksRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
 
 message UpdateBookRequest {
     string id = 1;
@@ -117,6 +133,8 @@ message UpdateBookRequest {
 
 message ListBooksResponse {
     repeated Book books = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }
 
 message AddBookCopyRequest {
@@ -125,10 +143,14 @@ message AddBookCopyRequest {
 
 message ListBookCopiesRequest {
     string book_id = 1;
+    int32 page = 2;
+    int32 limit = 3;
 }
 
 message ListBookCopiesResponse {
     repeated BookCopy copies = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }
 
 message CreateMemberRequest {
@@ -136,7 +158,10 @@ message CreateMemberRequest {
     string email = 2;
 }
 
-message ListMembersRequest {}
+message ListMembersRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
 
 message UpdateMemberRequest {
     string id = 1;
@@ -146,6 +171,8 @@ message UpdateMemberRequest {
 
 message ListMembersResponse {
     repeated Member members = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }
 
 message BorrowBookRequest {
@@ -160,8 +187,17 @@ message ReturnBookRequest {
 
 message ListMemberLoansRequest {
     string member_id = 1;
+    int32 page = 2;
+    int32 limit = 3;
+}
+
+message ListAllLoansRequest {
+    int32 page = 1;
+    int32 limit = 2;
 }
 
 message ListLoansResponse {
     repeated Loan loans = 1;
+    int32 total_count = 2;
+    int32 total_pages = 3;
 }

@@ -1,17 +1,28 @@
-class LibraryError(Exception):
-    """Base class for all library domain exceptions."""
-    def __init__(self, message: str):
+import grpc
+
+class AppError(Exception):
+    """Base class for all application domain exceptions."""
+    def __init__(self, message: str, code: str, grpc_status: grpc.StatusCode):
+        super().__init__(message)
         self.message = message
-        super().__init__(self.message)
+        self.code = code
+        self.grpc_status = grpc_status
 
-class EntityNotFoundError(LibraryError):
-    """Raised when a requested entity (Book, Member, etc.) is not found."""
-    pass
+class EntityNotFoundError(AppError):
+    def __init__(self, message: str = "Entity not found"):
+        super().__init__(message, "NOT_FOUND", grpc.StatusCode.NOT_FOUND)
 
-class ValidationError(LibraryError):
-    """Raised when business validation rules are violated (e.g. book unavailable)."""
-    pass
+class ConflictError(AppError):
+    def __init__(self, message: str = "Resource already exists"):
+        super().__init__(message, "ALREADY_EXISTS", grpc.StatusCode.ALREADY_EXISTS)
 
-class ConflictError(LibraryError):
-    """Raised when a unique constraint is violated (e.g. duplicate ISBN)."""
-    pass
+class ValidationError(AppError):
+    def __init__(self, message: str = "Validation failed"):
+        super().__init__(message, "INVALID_ARGUMENT", grpc.StatusCode.INVALID_ARGUMENT)
+
+class DatabaseError(AppError):
+    def __init__(self, message: str = "Database operation failed"):
+        super().__init__(message, "INTERNAL", grpc.StatusCode.INTERNAL)
+
+# Backward compatibility aliases if needed, but better to migrate
+LibraryError = AppError

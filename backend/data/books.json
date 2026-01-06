@@ -5,7 +5,7 @@
         "genres": [
             "Fantasy"
         ],
-        "isbn": "ISBN-TOLK-001",
+        "isbn": "9780618640157",
         "copies": 3
     },
     {
@@ -14,7 +14,7 @@
         "genres": [
             "Science Fiction"
         ],
-        "isbn": "ISBN-ASIM-001",
+        "isbn": "9780553382563",
         "copies": 2
     },
     {
@@ -23,7 +23,7 @@
         "genres": [
             "Mystery"
         ],
-        "isbn": "ISBN-CHRI-001",
+        "isbn": "9780062073563",
         "copies": 1
     },
     {
@@ -32,7 +32,7 @@
         "genres": [
             "Biography"
         ],
-        "isbn": "ISBN-ISAAC-001",
+        "isbn": "9781451648539",
         "copies": 2
     }
 ]

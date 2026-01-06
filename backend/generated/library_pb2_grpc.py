@@ -109,6 +109,11 @@ class LibraryServiceStub(object):
                 request_serializer=library__pb2.ListMemberLoansRequest.SerializeToString,
                 response_deserializer=library__pb2.ListLoansResponse.FromString,
                 _registered_method=True)
+        self.ListAllLoans = channel.unary_unary(
+                '/library.LibraryService/ListAllLoans',
+                request_serializer=library__pb2.ListAllLoansRequest.SerializeToString,
+                response_deserializer=library__pb2.ListLoansResponse.FromString,
+                _registered_method=True)
 
 
 class LibraryServiceServicer(object):
@@ -210,6 +215,12 @@ class LibraryServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListAllLoans(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_LibraryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -286,6 +297,11 @@ def add_LibraryServiceServicer_to_server(servicer, server):
             'ListMemberLoans': grpc.unary_unary_rpc_method_handler(
                     servicer.ListMemberLoans,
                     request_deserializer=library__pb2.ListMemberLoansRequest.FromString,
+                    response_serializer=library__pb2.ListLoansResponse.SerializeToString,
+            ),
+            'ListAllLoans': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListAllLoans,
+                    request_deserializer=library__pb2.ListAllLoansRequest.FromString,
                     response_serializer=library__pb2.ListLoansResponse.SerializeToString,
             ),
     }
@@ -693,6 +709,33 @@ class LibraryService(object):
             target,
             '/library.LibraryService/ListMemberLoans',
             library__pb2.ListMemberLoansRequest.SerializeToString,
+            library__pb2.ListLoansResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListAllLoans(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.LibraryService/ListAllLoans',
+            library__pb2.ListAllLoansRequest.SerializeToString,
             library__pb2.ListLoansResponse.FromString,
             options,
             channel_credentials,

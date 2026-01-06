@@ -14,7 +14,7 @@ def load_json(filename):
         return json.load(f)
 
 def seed():
-    print("🌱 Seeding Database from JSON configuration...")
+    print("Seeding Database from JSON configuration...")
     
     grpc_host = os.getenv('GRPC_HOST', 'localhost')
     grpc_port = os.getenv('GRPC_PORT', '50051')
@@ -90,10 +90,10 @@ def seed():
                 else:
                     raise e
 
-        print("\n✅ Seeding Complete! The application is ready with a clean, unique dataset.")
+        print("\nSeeding Complete! The application is ready with a clean, unique dataset.")
 
     except Exception as e:
-        print(f"❌ Error during seeding: {e}")
+        print(f"Error during seeding: {e}")
 
 if __name__ == "__main__":
     seed()

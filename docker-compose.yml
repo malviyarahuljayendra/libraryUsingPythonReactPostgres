@@ -28,14 +28,12 @@ services:
       GRPC_PORT: ${GRPC_PORT}
       MAX_WORKERS: ${MAX_WORKERS}
       PYTHONUNBUFFERED: "1"
+      RUN_TESTS: ${RUN_TESTS:-false}
     ports:
       - "${GRPC_PORT}:${GRPC_PORT}"
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
-    command: python backend/main.py
 
   gateway:
     build:

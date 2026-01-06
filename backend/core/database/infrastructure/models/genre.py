@@ -11,8 +11,14 @@ book_genre = Table(
     Column("genre_id", String, ForeignKey("genres.id", ondelete="CASCADE"), primary_key=True)
 )
 
+from backend.core.database.infrastructure.models.base import Base
+from backend.core.constants import DBTables
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+import uuid
+
 class GenreModel(Base):
-    __tablename__ = "genres"
+    __tablename__ = DBTables.GENRES # "genres"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False, unique=True)

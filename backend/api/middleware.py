@@ -1,33 +1,37 @@
+from backend.core.logger import logger
+from backend.core.context import request_id_ctx_var
+from backend.core.exceptions import AppError
+import uuid
 import grpc
-from backend.core.exceptions import LibraryError, EntityNotFoundError, ValidationError, ConflictError
 
-class ExceptionInterceptor(grpc.ServerInterceptor):
+class GlobalGrpcInterceptor(grpc.ServerInterceptor):
     def intercept_service(self, continuation, handler_call_details):
         handler = continuation(handler_call_details)
         if handler is None:
             return None
-
-        # Only intercept unary-unary calls for now
-        if handler.request_streaming or handler.response_streaming:
-            return handler
-
+            
         def wrapper(request, context):
+            # Extract request ID from metadata
+            metadata = dict(context.invocation_metadata())
+            request_id = metadata.get('x-request-id', str(uuid.uuid4()))
+            
+            # Set context variable
+            token = request_id_ctx_var.set(request_id)
+            
             try:
+                logger.info(f"Processing request: {handler_call_details.method}")
                 return handler.unary_unary(request, context)
-            except EntityNotFoundError as e:
-                context.abort(grpc.StatusCode.NOT_FOUND, str(e))
-            except ConflictError as e:
-                context.abort(grpc.StatusCode.ALREADY_EXISTS, str(e))
-            except ValidationError as e:
-                context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
-            except LibraryError as e:
-                context.abort(grpc.StatusCode.INTERNAL, str(e))
+            except AppError as e:
+                logger.warning(f"Domain Error: {e.code} - {e.message}")
+                context.set_trailing_metadata((("x-error-code", e.code),))
+                context.abort(e.grpc_status, e.message)
             except Exception as e:
-                # Log unexpected errors
-                print(f"Unhandled Exception in interceptor: {e}")
-                import traceback
-                traceback.print_exc()
-                context.abort(grpc.StatusCode.INTERNAL, "An unexpected error occurred.")
+                logger.error(f"Unhandled Exception: {e}", exc_info=True)
+                context.set_trailing_metadata((("x-error-code", "INTERNAL_ERROR"),))
+                context.abort(grpc.StatusCode.INTERNAL, "An unexpected internal error occurred.")
+            finally:
+                # Reset context to prevent leakage
+                request_id_ctx_var.reset(token)
 
         return grpc.unary_unary_rpc_method_handler(
             wrapper,

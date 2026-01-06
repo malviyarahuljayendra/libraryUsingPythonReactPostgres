@@ -9,21 +9,22 @@ from backend.api.service import LibraryService
 from backend.core.database import init_db
 
 from backend.core.config import Config
-from backend.api.middleware import ExceptionInterceptor
+from backend.core.logger import logger
+from backend.api.middleware import GlobalGrpcInterceptor
 
 def serve():
-    print("Initializing Database...")
+    logger.info("Initializing Database...")
     init_db()
     
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=Config.get_max_workers()),
-        interceptors=(ExceptionInterceptor(),)
+        interceptors=(GlobalGrpcInterceptor(),)
     )
     library_pb2_grpc.add_LibraryServiceServicer_to_server(LibraryService(), server)
     
     port = f'[::]:{Config.get_grpc_port()}'
     server.add_insecure_port(port)
-    print(f"Server started on {port}")
+    logger.info(f"Server started on {port}")
     server.start()
     try:
         while True:

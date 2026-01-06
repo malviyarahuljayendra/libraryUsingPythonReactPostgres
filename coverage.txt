@@ -1,0 +1,59 @@
+============================= test session starts ==============================
+platform linux -- Python 3.9.25, pytest-8.4.2, pluggy-1.6.0
+rootdir: /app
+plugins: cov-7.0.0
+collected 67 items
+
+backend/tests/integration/test_pagination_e2e.py ..                      [  2%]
+backend/tests/integration/test_services.py ..                            [  5%]
+backend/tests/unit/controllers/test_library_controller.py .............. [ 26%]
+                                                                         [ 26%]
+backend/tests/unit/services/test_author_service.py ...                   [ 31%]
+backend/tests/unit/services/test_book_service.py .......                 [ 41%]
+backend/tests/unit/services/test_genre_service.py .....                  [ 49%]
+backend/tests/unit/services/test_loan_service.py ........                [ 61%]
+backend/tests/unit/services/test_member_service.py .........             [ 74%]
+backend/tests/unit/services/test_pagination.py ..                        [ 77%]
+backend/tests/unit/services/test_utils.py ....                           [ 83%]
+backend/tests/unit/services/test_validation.py ....                      [ 89%]
+backend/tests/unit/test_managers.py .......                              [100%]
+
+=============================== warnings summary ===============================
+backend/core/config/__init__.py:4
+  /app/backend/core/config/__init__.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.9.25-final-0 ________________
+
+Name                                                      Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------------------
+backend/api/service.py                                      101      0   100%
+backend/core/config/__init__.py                              27      2    93%   28, 32
+backend/core/constants.py                                    14      0   100%
+backend/core/context.py                                       2      0   100%
+backend/core/database/__init__.py                             5      0   100%
+backend/core/database/infrastructure/__init__.py              0      0   100%
+backend/core/database/infrastructure/models/__init__.py       7      0   100%
+backend/core/database/infrastructure/models/author.py        15      0   100%
+backend/core/database/infrastructure/models/base.py           2      0   100%
+backend/core/database/infrastructure/models/book.py          22      0   100%
+backend/core/database/infrastructure/models/genre.py         15      0   100%
+backend/core/database/infrastructure/models/loan.py          14      0   100%
+backend/core/database/infrastructure/models/member.py        10      0   100%
+backend/core/database/repositories/__init__.py              108     37    66%   17, 21, 25, 31, 39, 42, 56, 59, 62-65, 68, 76, 82, 95, 98, 103-106, 114, 120, 123-126, 134, 137, 140, 143-152
+backend/core/exceptions.py                                   20      1    95%   25
+backend/core/logger.py                                       20      0   100%
+backend/core/messages.py                                     19      0   100%
+backend/core/utils.py                                        17      0   100%
+backend/services/__init__.py                                  5      0   100%
+backend/services/author_service.py                           26      0   100%
+backend/services/book_service.py                             71     10    86%   26, 38-39, 59, 64-66, 69-70, 79
+backend/services/genre_service.py                            26      0   100%
+backend/services/loan_service.py                             48      1    98%   19
+backend/services/member_service.py                           42      0   100%
+backend/services/validators/__init__.py                      20     10    50%   11, 15-21, 25-27
+---------------------------------------------------------------------------------------
+TOTAL                                                       656     61    91%
+======================== 67 passed, 1 warning in 1.49s =========================

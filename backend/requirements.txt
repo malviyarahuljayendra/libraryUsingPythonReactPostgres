@@ -4,3 +4,7 @@ sqlalchemy
 psycopg2-binary
 protobuf
 python-dotenv
+pydantic
+pydantic-settings
+pytest
+pytest-cov
